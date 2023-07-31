@@ -48,6 +48,24 @@ def dedup(ballot):
     return list(OrderedDict.fromkeys(ballot))
 
 
+def loop_erase(walk):
+    result = []
+    ballot = []
+    for num in walk:
+        if num != 0:
+            if num in ballot:
+                ballot = ballot[:ballot.index(num)] 
+            ballot.append(num)
+        elif ballot:
+            result.append(ballot)
+            ballot = []
+
+    if ballot:  # In case the last element(s) are not followed by 0
+        result.append(ballot)
+        
+    return result
+
+
 if __name__ == '__main__':
     election, names, location = parse("Data/edinburgh17-16.blt")
     # mat = gen_transition_probs(election=election)

@@ -1,4 +1,8 @@
 
+import pandas as pd
+import numpy as np
+
+
 def remove_zeros(ballot):
     to_return = []
     for vote in ballot:
@@ -31,3 +35,33 @@ def parse(filename):
                 names.append((first_name, last_name, party))
     raise Exception(f"Error parsing file '{filename}'.")
 
+
+def parse_condorcet(filename):
+    cvr = pd.read_csv(filename, index_col=0)
+    cands = pd.unique(cvr[cvr.columns].values.ravel('K'))
+    print(cands)
+    cvr = cvr[cvr.columns].replace('skipped', np.nan)
+    cvr = cvr[cvr.columns].replace('overvote', np.nan)
+    cvr = cvr[cvr.columns].replace('writein', np.nan)
+    cands = pd.unique(cvr[cvr.columns].values.ravel('K'))
+    cands = cands[:-1]
+    cands_dict = {name: idx + 1 for idx, name in enumerate(cands)}
+    cvr = cvr[cvr.columns].replace(cands_dict)
+    cvr = cvr.dropna(how='all')
+
+    row_counts = cvr[cvr.columns].value_counts(dropna=False)
+    df_counts = row_counts.reset_index()
+    df_counts.columns = ['rank1', 'rank2', 'rank3', 'count']
+    print(df_counts)
+
+
+# # Save the DataFrame to a CSV file
+#     df_counts.to_csv('minneapolis2021_ward2.csv', index=False)
+
+# # processed = {tuple(value for value in key if not np.isnan(
+# #     value)): row_counts[key] for key in row_counts}
+
+# # return processed
+
+
+# parse_condorcet("Data/condorcet/minneapolis_ward2_2021.csv")

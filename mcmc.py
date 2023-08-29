@@ -13,14 +13,14 @@ and compare with actual
 
 # election, names, location = parse("Data/edinburgh17-16.blt")
 
-election = {(3, 2, 1) : 1, (1, 2): 2, (3, 1, 2): 2, (1,): 3}
+election = {(3, 2, 1): 1, (1, 2): 2, (3, 1, 2): 2, (1,): 3}
 
 all_rankings = list(election.keys())
 cands = [item for ranking in all_rankings for item in ranking]
 cands = set(cands)
 nrows = len(cands) + 1
 
-print('num', sum(list(election.values())))
+# print('num', sum(list(election.values())))
 
 # filtered = {key: value for key, value in election.items() if len(key) == len(cands)}
 # print('complete_num', sum(list(filtered.values())))
@@ -30,6 +30,7 @@ print('num', sum(list(election.values())))
 # print('loc', location)
 
 # election = {(3, 2, 1) : 1, (1, 2): 2, (3, 1, 2): 2}
+
 
 def gen_transition_probs(election, is_normalized=True):
 
@@ -78,7 +79,6 @@ def gen_transition_probs(election, is_normalized=True):
                     if r_index == c_index - 1:
                         mat[r][c] += election[ranking]
                         # print('mat_val', mat[r][c])
-
 
     if not is_normalized:
         return mat
@@ -138,6 +138,7 @@ def stable_state(norm_mat):
 # for n in range(1,30):
 #     print(n,'th step, normalized:',np.around(M**n@v, decimals=5))
 
+
 def gen_mentions(cands, election, is_normalized=True):
     mentions = {}
     for ranking in election:
@@ -150,7 +151,7 @@ def gen_mentions(cands, election, is_normalized=True):
     # print(mentions)
     mentions_prob = [mentions[cand] for cand in cands]
     # print('Mentions (normalized)')
-    norm = np.array(mentions_prob)  / sum(mentions_prob)
+    norm = np.array(mentions_prob) / sum(mentions_prob)
     # print(norm)
     if not is_normalized:
         return mentions_prob
@@ -174,7 +175,7 @@ def borda_from_election(cands, election, is_normalized=True):
     # print('Borda (normalized)')
     # print(borda)
     borda_prob = [borda[cand] for cand in cands]
-    norm = np.array(borda_prob)  / sum(borda_prob)
+    norm = np.array(borda_prob) / sum(borda_prob)
     # print(norm)
     if not is_normalized:
         return borda_prob
@@ -213,7 +214,7 @@ def borda_from_mat(mat):
         w = n - i
         # print('power', i)
         # print('weight', w)
-        q_exp = q_exp + w * np.linalg.matrix_power(q_mat,i)
+        q_exp = q_exp + w * np.linalg.matrix_power(q_mat, i)
 
     # q_factor = sum([(n - i) * np.power(q_mat,i) for i in range(0, n)])
     res = np.matmul(q_exp, p_mat) @ v
@@ -222,8 +223,10 @@ def borda_from_mat(mat):
     print((res[1:] / sum(res[1:])))
     return res[1:] / sum(res[1:])
 
+
 if __name__ == "__main__":
-    transition_mat = gen_transition_probs(election=election, is_normalized=False)
+    transition_mat = gen_transition_probs(
+        election=election, is_normalized=False)
 
     print('TRANSITION')
     print(transition_mat)
@@ -231,12 +234,12 @@ if __name__ == "__main__":
     # for row in transition_mat:
     #     row_str = " ".join(f"{elem:.2f}" for elem in row)
     #     print(row_str)
-    
+
     be = borda_from_election(cands, election)
     it_mat = transition_mat.T
     ss = stable_state(transition_mat)
     ss = ss[1:] / sum(ss[1:])
-    bm = borda_from_mat(it_mat) # estimated
+    bm = borda_from_mat(it_mat)  # estimated
     men = gen_mentions(cands, election)
 
     # mat = gen_transition_probs(election=election)
@@ -260,7 +263,7 @@ if __name__ == "__main__":
     # for row in syn_transition_mat:
     #     row_str = " ".join(f"{elem:.2f}" for elem in row)
     #     print(row_str)
-    
+
     # for i in range(1, 100):
     #     walk = sample_walk(syn_transition_mat, n)
     #     ballots = cut_up_ballots(walk)
@@ -269,7 +272,7 @@ if __name__ == "__main__":
     #     syn_transition_mat2 = gen_transition_probs(election=syn_election_be)
     #     diff = syn_transition_mat - syn_transition_mat2
     #     syn_transition_mat = syn_transition_mat2
-    
+
     # print('SYNTHETIC round:', i)
     # for row in syn_transition_mat:
     #     row_str = " ".join(f"{elem:.2f}" for elem in row)
@@ -279,8 +282,6 @@ if __name__ == "__main__":
     # for row in diff:
     #     row_str = " ".join(f"{elem:.2f}" for elem in row)
     #     print(row_str)
-
-    
 
     # syn_it_mat = syn_transition_mat.T
     syn_de = borda_from_election(cands, syn_election_be)
@@ -296,11 +297,12 @@ if __name__ == "__main__":
     ballot_len_acc = Counter(get_len(acc_ballots))
     ballot_len_le = Counter(get_len(loop_erased))
     ballot_len_syn = dict(Counter(get_len(ballots)))
-    
-    overvotes = {key: value for key, value in ballot_len_syn.items() if key > len(cands)}
+
+    overvotes = {key: value for key,
+                 value in ballot_len_syn.items() if key > len(cands)}
     for key in overvotes.keys():
         ballot_len_syn[len(cands)] += overvotes[key]
-    
+
     # print(ballot_len_syn)
 
     # ballot_length, frequencies_acc = zip(*ballot_len_acc.items())
@@ -359,7 +361,6 @@ if __name__ == "__main__":
     # # plt.bar(cands + bar_width, syn_be, bar_width, label='synthetic (dedup)', color='orange')
     # # plt.bar(cands, syn_le, bar_width,label='synthetic (loop erase)', color='green')
     # # plt.bar(cands - 2 * bar_width, bm, bar_width,label='estimated', color='red')
-
 
     # # Add labels and title
     # plt.xlabel('candidates')

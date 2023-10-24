@@ -264,14 +264,21 @@ if __name__ == "__main__":
     #     row_str = " ".join(f"{elem:.2f}" for elem in row)
     #     print(row_str)
 
-    # for i in range(1, 100):
-    #     walk = sample_walk(syn_transition_mat, n)
-    #     ballots = cut_up_ballots(walk)
-    #     deduped = list(map(loop_erase, ballots))
-    #     syn_election_be = dict(Counter(tuple(lst) for lst in deduped))
-    #     syn_transition_mat2 = gen_transition_probs(election=syn_election_be)
-    #     diff = syn_transition_mat - syn_transition_mat2
-    #     syn_transition_mat = syn_transition_mat2
+    for i in range(1, 100):
+        # generate n ballots from a transition probablility matrix based on a synthetic election corpus (n is the same number as the ballot count for the original election)
+        # the synthetic election corpus is generated from the transition probability matrix for the original election
+        walk = sample_walk(syn_transition_mat, n)
+        # cut up the walk into ballots such that when 0 appears in the walk, the ballot is cut up
+        ballots = cut_up_ballots(walk)
+        # apply some modification method (ex. loop erasure) to all the ballots
+        deduped = list(map(loop_erase, ballots))
+        # create a corpus from the modified ballots in the form of a dictionary of ballot signature to count
+        syn_election_be = dict(Counter(tuple(lst) for lst in deduped))
+        # generate transition probabilities from the synthetic corpus
+        syn_transition_mat2 = gen_transition_probs(election=syn_election_be)
+        diff = syn_transition_mat - syn_transition_mat2
+        # update the variable storing the synthetic transition matrix and repeat the process
+        syn_transition_mat = syn_transition_mat2
 
     # print('SYNTHETIC round:', i)
     # for row in syn_transition_mat:
